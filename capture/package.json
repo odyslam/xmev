@@ -1,0 +1,24 @@
+{
+  "name": "xmev-capture",
+  "author": "odysseas.eth",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@influxdata/influxdb-client": "^1.24.0",
+    "dotenv": "^16.0.0",
+    "ethers": "^5.6.1"
+  },
+  "eslintConfig": {
+    "extends": "eslint:recommended",
+    "parserOptions": {
+      "sourceType": "module",
+      "ecmaVersion": 2021
+    },
+    "env": {
+      "node": true,
+      "es6": true
+    }
+  }
+}
