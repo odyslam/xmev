@@ -14,6 +14,7 @@ async function main() {
   const ethereumKey = process.env.XMEV_ETHEREUM_KEY;
   const token = process.env.XMEV_INFLUX_TOKEN;
   const org = process.env.XMEV_INFLUX_ORG;
+  const transmit = process.env.XMEV_TRANSMIT;
   const bucket = 'xmev'
 
   const ethereumProvider = new ethers.providers.AlchemyProvider(null, ethereumKey);
@@ -33,15 +34,21 @@ async function main() {
     const delta_blocks = new Point('delta_blocks')
       .tag("eth_block", block)
       .tag("pol_block", lastPolBlock)
+      .tag("timestamp", lastEthBlockTime)
       .floatField("delta", blockDelta)
     if (!isNaN(timeDelta)) {
       const delta_time = new Point('delta_block_time')
         .tag("eth_block", block)
         .tag("pol_block", lastPolBlock)
+        .tag("timestamp", lastEthBlockTime)
         .floatField("delta", timeDelta)
-      writeApi.writePoints([ethBlock, delta_time, delta_blocks]);
+      if (transmit == "TRUE") {
+        writeApi.writePoints([ethBlock, delta_time, delta_blocks]);
+      }
     } else {
-      writeApi.writePoints([ethBlock, delta_blocks]);
+      if (transmit == "TRUE") {
+        writeApi.writePoints([ethBlock, delta_blocks]);
+      }
     }
     console.log("ETHEREUM ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     console.log(`New Eth Block: ${block}`);
@@ -63,7 +70,9 @@ async function main() {
     const polBlock = new Point("polygon_timestamps")
       .tag("block", block)
       .intField('timestamp', lastPolygonBlockTime)
-    writeApi.writePoint(polBlock);
+    if (transmit == "TRUE") {
+      writeApi.writePoint(polBlock);
+    }
     console.log("POLYGON ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     console.log(`New Polygon Block: ${block}`);
     console.log(`Block delta: ${blockDelta}`);
@@ -71,7 +80,11 @@ async function main() {
     console.log(polBlock);
     console.log("POLYGON ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
   });
-  await flushValues(writeApi);
+  if (transmit == "TRUE") {
+    await flushValues(writeApi);
+  } else {
+    console.log("Transmit is set to OFF");
+  }
 }
 async function flushValues(writeApi) {
   await writeApi.flush(true);
